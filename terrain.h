@@ -6,6 +6,16 @@
 #include <stdio.h>
 #include <math.h>
 
+/**
+ * SDL_Instance - instance of variables needed for the execution 
+ * of the problem
+ * @window: windows
+ * @screenSurface: screensurface for the windows
+ * @renderer: renderer
+ * @points3d: array of arrays of points in 3d
+ * @points2d: array of arrays of points in 3d represented in 2d
+ * @inclination: inclination for view
+ **/
 typedef struct SDL_Instance
 {
   SDL_Window *window;
@@ -16,6 +26,12 @@ typedef struct SDL_Instance
   double inclination;
 } SDL_Instance;
 
+/**
+ * point3d_t - representation of point in 3d
+ * @x: x coordinate
+ * @y: y coordinate
+ * @z: z coordinate
+ **/
 typedef struct point3d_t
 {
   double x;
@@ -23,6 +39,12 @@ typedef struct point3d_t
   double z;
 } point3d_t;
 
+/**
+ * point3d_t - representation of point in 2d to print
+ * in windows
+ * @x: x coordinate
+ * @y: y coordinate
+ **/
 typedef struct point2d_t
 {
   double x;
@@ -30,28 +52,30 @@ typedef struct point2d_t
 } point2d_t;
 
 int init_instance(SDL_Instance *);
-void draw_stuff(SDL_Instance *instance);
 int poll_events(SDL_Instance *instance);
 int getSurface(SDL_Surface **screenSurface, SDL_Instance *instance);
 void TheExit(SDL_Instance *instance);
-void rotate_points(SDL_Instance *instance, double angle);
-void change_inclination(SDL_Instance *instance, double extra_inclination);
 
 /* utils.c */
+void rotate_points(SDL_Instance *instance, double angle);
+void change_inclination(SDL_Instance *instance, double extra_inclination);
+void draw_stuff(SDL_Instance *instance);
 point3d_t **init_points3d(SDL_Instance *instance);
 point2d_t **init_points2d(SDL_Instance *instance);
 void free_points2d(point2d_t **points);
 void free_points3d(point3d_t **points);
-void draw3dpoints(SDL_Instance *instance, point3d_t **points);
+void drawstructure(SDL_Instance *instance);
 void points3dto2d(SDL_Instance *instance);
 
 /*  Screen dimension constants */
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 960;
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 960
 
 /* points INFO */
-const int XPOINTS = 8;
-const int YPOINTS = 8;
-const int POINTS_DISTANCE = 100;
-const double INCLINATION = 0.7;
+#define XPOINTS 8
+#define YPOINTS 8
+#define POINTS_DISTANCE 100
+#define INCLINATION 0.7
+#define ROTATIONANGLE 5
+#define EXTRAINCLINATION 0.01
 #endif

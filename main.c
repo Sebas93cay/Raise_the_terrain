@@ -1,6 +1,14 @@
 #include "terrain.h"
 
-int main(void)
+/**
+ * main - Raise the terrain project, it shows a 3d terrain
+ * The user is able to rotate the terrain and change the inclination
+ * view using the arrow keys
+ * 
+ * Return: 0 if program is normally closed, 1 if an error occur
+ * 
+ */
+int main(int argc, char **argv)
 {
   SDL_Instance instance;
 
@@ -25,107 +33,13 @@ int main(void)
   return (0);
 }
 
-void draw_stuff(SDL_Instance *instance)
-{
-  /*  SDL_SetRenderDrawColor(instance->renderer, 0xFF, 0XFF, 0XFF, 0XFF);
-    SDL_RenderDrawLine(instance->renderer, 10, 10, 100, 100);
-  SDL_SetRenderDrawColor(instance->renderer, 0x00, 0XFF, 0X00, 0XFF);
-  SDL_RenderDrawPoint(instance->renderer, 150, 150);
+/**
+ * TheExit - Function to free and destroy array of points windows and 
+ * renderer used during the program
+ * 
+ * @instance: instance of variables
+ * Return: nothing
  */
-  SDL_SetRenderDrawColor(instance->renderer, 0xFF, 0XFF, 0XFF, 0XFF);
-  points3dto2d(instance);
-  draw3dpoints(instance, instance->points3d);
-}
-
-point2d_t **init_points2d(SDL_Instance *instance)
-{
-  int i = 0;
-
-  instance->points2d = malloc(sizeof(point2d_t *) * XPOINTS);
-  if (instance->points2d == NULL)
-  {
-    printf("points were not able to initialize\n");
-    return (NULL);
-  }
-  for (i = 0; i < XPOINTS; i++)
-  {
-    instance->points2d[i] = malloc(sizeof(point2d_t) * YPOINTS);
-    if (instance->points2d[i] == NULL)
-    {
-      printf("points were not able to initialize\n");
-      for (i = i - 1; i >= 0; i--)
-        free(instance->points2d[i]);
-      free(instance->points2d);
-      return (NULL);
-    }
-  }
-  return (instance->points2d);
-}
-
-void free_points2d(point2d_t **points)
-{
-  int i = 0;
-
-  for (i = 0; i < XPOINTS; i++)
-    free(points[i]);
-  free(points);
-}
-
-void free_points3d(point3d_t **points)
-{
-  int i = 0;
-
-  for (i = 0; i < XPOINTS; i++)
-    free(points[i]);
-  free(points);
-}
-
-void draw3dpoints(SDL_Instance *instance, point3d_t **points)
-{
-  int i = 0, j = 0, x = 0, y = 0, x_prev = 0, y_prev = 0;
-
-  for (i = 0; i < XPOINTS; i++)
-  {
-    for (j = 0; j < YPOINTS - 1; j++)
-    {
-      SDL_RenderDrawLine(instance->renderer, instance->points2d[i][j].x,
-                         instance->points2d[i][j].y,
-                         instance->points2d[i][j + 1].x,
-                         instance->points2d[i][j + 1].y);
-    }
-  }
-  for (j = 0; j < YPOINTS; j++)
-  {
-    for (i = 0; i < XPOINTS - 1; i++)
-    {
-      SDL_RenderDrawLine(instance->renderer, instance->points2d[i][j].x,
-                         instance->points2d[i][j].y,
-                         instance->points2d[i + 1][j].x,
-                         instance->points2d[i + 1][j].y);
-    }
-  }
-}
-
-void points3dto2d(SDL_Instance *instance)
-{
-  int i = 0, j = 0;
-  point3d_t **points = instance->points3d;
-
-  for (i = 0; i < XPOINTS; i++)
-  {
-    for (j = 0; j < YPOINTS; j++)
-    {
-      (instance->points2d)[i][j].x = instance->inclination * points[i][j].x - instance->inclination * points[i][j].y + SCREEN_WIDTH / 2;
-      (instance->points2d)[i][j].y = (1 - instance->inclination) * points[i][j].x + (1 - instance->inclination) * points[i][j].y - points[i][j].z + SCREEN_HEIGHT / 2;
-    }
-  }
-}
-
-void change_inclination(SDL_Instance *instance, double extra_inclination)
-{
-  instance->inclination += extra_inclination;
-}
-
 void TheExit(SDL_Instance *instance)
 {
   free_points2d(instance->points2d);
@@ -136,6 +50,16 @@ void TheExit(SDL_Instance *instance)
   exit(0);
 }
 
+/**
+ * poll_events - read the events created by the user, 
+ * if the user press left or right arrow key the structure is rotared 
+ * ROTATIONANGLE to the respective side
+ * if the user press up or down arrow key the instance->inclination 
+ * EXTRAINCLINATION is added or substracted
+ * @instance: instance of variables
+ * Return: if catched event is for exit the program returns 1,
+ * otherwise returns 0
+ */
 int poll_events(SDL_Instance *instance)
 {
   SDL_Event event;
@@ -153,14 +77,13 @@ int poll_events(SDL_Instance *instance)
       if (key.keysym.scancode == 0x29)
         return (1);
       if (key.keysym.sym == SDLK_LEFT)
-        rotate_points(instance, 5);
-
+        rotate_points(instance, ROTATIONANGLE);
       if (key.keysym.sym == SDLK_RIGHT)
-        rotate_points(instance, -5);
+        rotate_points(instance, -ROTATIONANGLE);
       if (key.keysym.sym == SDLK_UP)
-        change_inclination(instance, -0.01);
+        change_inclination(instance, -EXTRAINCLINATION);
       if (key.keysym.sym == SDLK_DOWN)
-        change_inclination(instance, 0.01);
+        change_inclination(instance, EXTRAINCLINATION);
 
       break;
     default:
@@ -170,25 +93,11 @@ int poll_events(SDL_Instance *instance)
   return (0);
 }
 
-void rotate_points(SDL_Instance *instance, double angle)
-{
-  double rads = 0, prevx, prevy;
-  int i, j;
-
-  rads = angle * M_PI / 180;
-
-  for (i = 0; i < XPOINTS; i++)
-  {
-    for (j = 0; j < YPOINTS; j++)
-    {
-      prevx = instance->points3d[i][j].x;
-      prevy = instance->points3d[i][j].y;
-      instance->points3d[i][j].x = (prevx * cos(rads)) - (prevy * sin(rads));
-      instance->points3d[i][j].y = (prevx * sin(rads)) + (prevy * cos(rads));
-    }
-  }
-}
-
+/**
+ * init_instance - initialize the windows, renderer and screenSurface from instance
+ * @instance: instance of variables
+ * Return: returns 0, unless an error occurs, in which case it returns 1
+ */
 int init_instance(SDL_Instance *instance)
 {
   /* Initialize SDL */
